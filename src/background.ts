@@ -1,9 +1,14 @@
 import { getProductInfo } from './api';
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log(request.barcode);
     if (request.type === 'getProductInfo') {
         getProductInfo(request.barcode).then((data) => {
-            sendResponse({ nutriScore: data.product.nutriscore_grade });
+            sendResponse({
+                name: data.product.product_name,
+                nutriScore: data.product.nutriscore_grade,
+                carbonFootprint: data.product.nutriments['carbon-footprint-from-known-ingredients_100g'] || 'Na'
+            });
         });
         return true; // Indicates that the response is asynchronous
     }
