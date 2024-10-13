@@ -8,31 +8,29 @@ Follow these steps to build Aletheia:
 1. Ensure you have [Node.js](https://nodejs.org/) (version 12 or higher) installed on your system.
 
 2. Clone the Aletheia repository:
-git clone https://github.com/yourusername/aletheia.git
-cd aletheia
-
-markdown
-Copier le code
+```shell
+git clone git@github.com:4ntoninFille/Aletheia.git
+```
+```shell
+cd Aletheia
+```
 
 3. Install the project dependencies:
+```shell
 npm install
-
-markdown
-Copier le code
+```
 
 4. Build the extension:
+```shell
 npm run build
-
-vbnet
-Copier le code
+```
 
 This command will create a `dist` folder containing the built extension.
 
 5. For development with auto-rebuilding on file changes, use:
+```shell
 npm run watch
-
-markdown
-Copier le code
+```
 
 ## Loading Aletheia in Your Browser
 
