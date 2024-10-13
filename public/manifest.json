@@ -1,0 +1,28 @@
+{
+    "manifest_version": 2,
+    "version": "1.0",
+    "name": "Aletheia",
+    "permissions": [
+        "https://world.openfoodfacts.net/*",
+        "https://www.intermarche.com/*"
+    ],
+    "background": {
+        "scripts": [
+            "background.js"
+        ],
+        "persistent": false
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://www.intermarche.com/*"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "browser_action": {
+        "default_popup": "popup.html"
+    }
+}
