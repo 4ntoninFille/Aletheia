@@ -7,12 +7,12 @@ function extractBarcodeFromURL(url: string): string | null {
 }
 
 // Function to create and append product info element
-function appendProductInfo(parent: Element, name: string, nutriScore: string, carbonFootprint: string | number): void {
+function appendProductInfo(parent: Element, name: string, nutriScore: string, ecoScore: string, carbonFootprint: string | number): void {
     const infoElement = document.createElement('div');
     infoElement.style.cssText = 'background-color: #f0f0f0; padding: 10px; margin-top: 10px; border-radius: 5px;';
 
     // Function to get Nutri-Score color
-    const getNutriScoreColor = (score: string): string => {
+    const getScoreColor = (score: string): string => {
         const colors: { [key: string]: string } = {
             'A': '#038141',
             'B': '#85BB2F',
@@ -23,58 +23,22 @@ function appendProductInfo(parent: Element, name: string, nutriScore: string, ca
         return colors[score.toUpperCase()] || '#000000';
     };
 
-    // Function to calculate Eco-Score (simplified version)
-    const calculateEcoScore = (carbonFootprint: string | number): { score: string; color: string } => {
-        if (carbonFootprint === 'NA' || carbonFootprint === '') {
-            return { score: 'Unknown', color: '#808080' }; // Gray color for unknown
-        }
-
-        const footprintValue = typeof carbonFootprint === 'string' ? parseFloat(carbonFootprint) : carbonFootprint;
-        if (isNaN(footprintValue)) {
-            return { score: 'Unknown', color: '#808080' }; // Gray color for invalid values
-        }
-
-        let score: string;
-        let color: string;
-
-        if (footprintValue <= 0.1) {
-            score = 'A';
-            color = '#038141';
-        } else if (footprintValue <= 0.4) {
-            score = 'B';
-            color = '#85BB2F';
-        } else if (footprintValue <= 0.8) {
-            score = 'C';
-            color = '#FECB02';
-        } else if (footprintValue <= 1.5) {
-            score = 'D';
-            color = '#EE8100';
-        } else {
-            score = 'E';
-            color = '#E63E11';
-        }
-
-        return { score, color };
-    };
-
-    const ecoScore = calculateEcoScore(carbonFootprint);
-
     infoElement.innerHTML = `
       <p>
         <strong>Nutri-Score:</strong> 
-        <span style="background-color: ${getNutriScoreColor(nutriScore)}; color: white; padding: 2px 5px; border-radius: 3px;">
+        <span style="background-color: ${getScoreColor(nutriScore)}; color: white; padding: 2px 5px; border-radius: 3px;">
           ${nutriScore.toUpperCase()}
         </span>
       </p>
       <p>
-        <strong>Eco-Score:</strong> 
-        <span style="background-color: ${ecoScore.color}; color: white; padding: 2px 5px; border-radius: 3px;">
-          ${ecoScore.score}
+        <strong>Nutri-Score:</strong> 
+        <span style="background-color: ${getScoreColor(ecoScore)}; color: white; padding: 2px 5px; border-radius: 3px;">
+          ${ecoScore.toUpperCase()}
         </span>
       </p>
       <p>
         <strong>Carbon Footprint:</strong> 
-        <span style="color: ${ecoScore.color}; font-weight: bold;">
+        <span style="color: ${ecoScore}; font-weight: bold;">
           ${carbonFootprint === 'Na' ? 'Na' : `${carbonFootprint}`}
         </span>
       </p>
@@ -109,6 +73,7 @@ function processProduct(productElement: Element) {
                                     productContainer,
                                     response.name,
                                     response.nutriScore,
+                                    response.ecoScore,
                                     response.carbonFootprint
                                 );
                             }

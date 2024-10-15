@@ -7,6 +7,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             sendResponse({
                 name: data.product.product_name,
                 nutriScore: data.product.nutriscore_grade,
+                ecoScore: data.product.ecoscore_grade,
                 carbonFootprint: data.product.nutriments['carbon-footprint-from-known-ingredients_100g'] || 'Na'
             });
         });
