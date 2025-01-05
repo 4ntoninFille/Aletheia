@@ -58,100 +58,114 @@ function createProductInfo(name: string, nutriScore: string, ecoScore: string, c
     return infoElement;
 }
 
-function processProduct(productElement: Element) {
+function processProduct(productElement: HTMLElement) {
+    if (productElement.dataset.processed) return;
     const productLink = productElement.querySelector('a.link.link--link.productCard__link') as HTMLAnchorElement | null;
 
-    // First, remove any existing product info container
-    const existingContainer = productElement.querySelector('.product-info-container');
-    if (existingContainer) {
-        existingContainer.remove();
-    }
-
-    chrome.runtime.sendMessage({type: 'getFilters'}, (activeFilters) => {
-        if (productLink) {
-            const href = productLink.getAttribute('href');
-            if (href) {
-                const barcode = extractBarcodeFromURL(href);
-                if (barcode) {
-                    console.log('Barcode found:', barcode);
-
-                    chrome.runtime.sendMessage(
-                        { type: 'getProductInfo', barcode: barcode },
-                        (response) => {
-                            if (response && response.name && response.nutriScore) {
-                                if (activeFilters.length === 0 || activeFilters.includes(response.nutriScore.toUpperCase())) {
-                                    console.log('Product Info:', response);
-
-                                    const infoElement = createProductInfo(
-                                        response.name,
-                                        response.nutriScore,
-                                        response.ecoScore,
-                                        response.carbonFootprint
-                                    );
-
-                                    const priceElement = productElement.querySelector('.stime-product--footer__prices');
-                                    
-                                    if (priceElement) {
-                                        const container = document.createElement('div');
-                                        container.className = 'product-info-container';  // Add a class for easy identification
-                                        container.style.cssText = `
-                                            width: 100%;
-                                            display: flex;
-                                            flex-direction: column;
-                                            align-items: center;
-                                        `;
-
-                                        container.appendChild(infoElement);
-
-                                        if (priceElement.parentNode) {
-                                            priceElement.parentNode.insertBefore(container, priceElement);
-                                            container.appendChild(priceElement);
-                                        }
-                                    } else {
-                                        console.log('Price element not found');
-                                    }
-                                } else {
-                                    productElement.remove();
+    if (productLink) {
+        const href = productLink.getAttribute('href');
+        if (href) {
+            const barcode = extractBarcodeFromURL(href);
+            if (barcode) {
+                console.log('Barcode found:', barcode);
+                // Send message to background script with the extracted barcode
+                chrome.runtime.sendMessage(
+                    { type: 'getProductInfo', barcode: barcode },
+                    (response) => {
+                        if (response && response.name && response.nutriScore) {
+                            console.log('Product Info:', response);
+                            // Create the product information element
+                            const infoElement = createProductInfo(
+                                response.name,
+                                response.nutriScore,
+                                response.ecoScore,
+                                response.carbonFootprint
+                            );
+                            // Find the price element
+                            const priceElement = productElement.querySelector('.stime-product--footer__prices');
+                            
+                            if (priceElement) {
+                                // Create a container for the new elements
+                                const container = document.createElement('div');
+                                container.style.cssText = `
+                                    width: 100%;
+                                    display: flex;
+                                    flex-direction: column;
+                                    align-items: center;
+                                `;
+                                // Append the info element to the container
+                                container.appendChild(infoElement);
+                                // If there's a price element, move it into the container
+                                if (priceElement.parentNode) {
+                                    priceElement.parentNode.insertBefore(container, priceElement);
+                                    container.appendChild(priceElement);
                                 }
                             } else {
-                                productElement.remove();
+                                console.log('Price element not found');
                             }
                         }
-                    );
-                } else {
-                    console.log('Barcode not found in URL');
-                    productElement.remove();
-                }
+                    }
+                );
             } else {
-                console.log('Product link href not found');
-                productElement.remove();
+                console.log('Barcode not found in URL');
             }
         } else {
-            console.log('Product link element not found');
-            productElement.remove();
+            console.log('Product link href not found');
         }
-    });
-}
-
-// Find all product items in the grid
-const productGrid = document.querySelector('.stime-product-list__grid');
-if (productGrid) {
-    const productItems = productGrid.querySelectorAll('.stime-product-list__item');
-    productItems.forEach(processProduct);
-} else {
-    console.log('Product grid not found');
-}
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.type === 'filtersUpdated') {
-        // Re-process all products with new filters
-        const productGrid = document.querySelector('.stime-product-list__grid');
-        if (productGrid) {
-            const productItems = productGrid.querySelectorAll('.stime-product-list__item');
-            productItems.forEach(processProduct);
-        }
+    } else {
+        console.log('Product link element not found');
     }
-});
+    productElement.dataset.processed = 'true';
+}
+
+// Function to process all product items in the grid
+function processProductGrid(): void {
+    const productGrid = document.querySelector('.stime-product-list__grid') as HTMLElement | null;
+    if (productGrid) {
+        const productItems = productGrid.querySelectorAll<HTMLElement>('.stime-product-list__item');
+        productItems.forEach(processProduct);
+    } else {
+        console.log('Product grid not found');
+    }
+}
+
+// Utility function for debouncing
+function debounce<T extends (...args: any[]) => void>(func: T, delay: number): T {
+    let timer: NodeJS.Timeout | null = null;
+    return ((...args: Parameters<T>) => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => func(...args), delay);
+    }) as T;
+}
+
+// MutationObserver to handle dynamic changes
+const observer = new MutationObserver(
+    debounce(() => {
+        observer.disconnect(); // Temporarily disconnect to avoid loops
+        processProductGrid();
+        observer.observe(document.body, { childList: true, subtree: true }); // Reconnect observer
+    }, 200) // Debounce delay (adjust as needed)
+);
+
+// Observe the body for changes
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Initial check when the page loads
+window.onload = (): void => {
+    processProductGrid();
+};
+
+
+// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+//     if (message.type === 'filtersUpdated') {
+//         // Re-process all products with new filters
+//         const productGrid = document.querySelector('.stime-product-list__grid');
+//         if (productGrid) {
+//             const productItems = productGrid.querySelectorAll('.stime-product-list__item');
+//             productItems.forEach(processProduct);
+//         }
+//     }
+// });
 
 
 console.log('Content script done');
