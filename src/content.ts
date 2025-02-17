@@ -52,6 +52,32 @@ function createProductInfo(name: string, nutriScore: string, ecoScore: string): 
     return infoElement;
 }
 
+function createLoader(): HTMLElement {
+    const loader = document.createElement('div');
+    loader.className = 'loader';
+    loader.style.cssText = `
+        background-color: #e0e0e0;
+        height: 50px;
+        width: 100%;
+        margin-top: 10px;
+        border-radius: 5px;
+        position: relative;
+        overflow: hidden;
+    `;
+    const shine = document.createElement('div');
+    shine.style.cssText = `
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 20%, rgba(255,255,255,0.5) 50%, rgba(255,255,255,0.2) 80%, rgba(255,255,255,0) 100%);
+        animation: shine 1.5s infinite;
+    `;
+    loader.appendChild(shine);
+    return loader;
+}
 function processProduct(productElement: HTMLElement, productInfo: any) {
     if (productElement.dataset.processed) return;
 
@@ -96,14 +122,25 @@ function processProductGrid(): void {
         const barcodes: string[] = [];
 
         productItems.forEach((productElement) => {
-            const productLink = productElement.querySelector('a.link.link--link.productCard__link') as HTMLAnchorElement | null;
-            if (productLink) {
-                const href = productLink.getAttribute('href');
-                if (href) {
-                    const barcode = extractBarcodeFromURL(href);
-                    console.log('Barcode found:', barcode);
-                    if (barcode) {
-                        barcodes.push(barcode);
+            if (!productElement.dataset.loaderAdded) {
+                const productLink = productElement.querySelector('a.link.link--link.productCard__link') as HTMLAnchorElement | null;
+                if (productLink) {
+                    const href = productLink.getAttribute('href');
+                    if (href) {
+                        const barcode = extractBarcodeFromURL(href);
+                        console.log('Barcode found:', barcode);
+                        if (barcode) {
+                            barcodes.push(barcode);
+                            // Add loader to product element just above the price element
+                            const loader = createLoader();
+                            const priceElement = productElement.querySelector('.stime-product--footer__prices');
+                            if (priceElement && priceElement.parentNode) {
+                                priceElement.parentNode.insertBefore(loader, priceElement);
+                            } else {
+                                productElement.appendChild(loader);
+                            }
+                            productElement.dataset.loaderAdded = 'true';
+                        }
                     }
                 }
             }
@@ -120,6 +157,11 @@ function processProductGrid(): void {
                             const barcode = barcodes[index];
                             const productInfo = response.products.find((product: any) => product.barcode === barcode);
                             console.log('processing product:', productInfo);
+                            const loader = productElement.querySelector('.loader');
+                            // Remove loader
+                            if (loader) {
+                                loader.remove();
+                            }
                             if (productInfo) {
                                 processProduct(productElement, productInfo);
                             }
