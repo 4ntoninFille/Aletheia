@@ -5,6 +5,7 @@
     "permissions": [
         "https://world.openfoodfacts.net/*",
         "http://127.0.0.1/*",
+        "http://35.180.111.230:8010/*",
         "https://www.intermarche.com/*"
     ],
     "background": {

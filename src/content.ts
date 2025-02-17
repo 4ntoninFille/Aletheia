@@ -6,7 +6,7 @@ function extractBarcodeFromURL(url: string): string | null {
     return match ? match[1] : null;
 }
 
-function createProductInfo(name: string, nutriScore: string, ecoScore: string, carbonFootprint: string | number): HTMLElement {
+function createProductInfo(name: string, nutriScore: string, ecoScore: string): HTMLElement {
     const infoElement = document.createElement('div');
     infoElement.style.cssText = `
         background-color: #f0f0f0;
@@ -48,73 +48,43 @@ function createProductInfo(name: string, nutriScore: string, ecoScore: string, c
         <strong>Eco-Score:</strong> 
         ${getScoreDisplay(ecoScore)}
       </p>
-      <p>
-        <strong>Carbon Footprint:</strong> 
-        <span style="color: green; font-weight: bold;">
-          ${carbonFootprint === 'Na' || carbonFootprint === 'UNKNOWN' ? '<span style="color: red;">Na</span>' : `${carbonFootprint}`}
-        </span>
-      </p>
     `;
     return infoElement;
 }
 
-function processProduct(productElement: HTMLElement) {
+function processProduct(productElement: HTMLElement, productInfo: any) {
     if (productElement.dataset.processed) return;
-    const productLink = productElement.querySelector('a.link.link--link.productCard__link') as HTMLAnchorElement | null;
 
-    if (productLink) {
-        const href = productLink.getAttribute('href');
-        if (href) {
-            const barcode = extractBarcodeFromURL(href);
-            if (barcode) {
-                console.log('Barcode found:', barcode);
-                // Send message to background script with the extracted barcode
-                chrome.runtime.sendMessage(
-                    { type: 'getProductInfo', barcode: barcode },
-                    (response) => {
-                        if (response && response.name && response.nutriScore) {
-                            console.log('Product Info:', response);
-                            // Create the product information element
-                            const infoElement = createProductInfo(
-                                response.name,
-                                response.nutriScore,
-                                response.ecoScore,
-                                response.carbonFootprint
-                            );
-                            // Find the price element
-                            const priceElement = productElement.querySelector('.stime-product--footer__prices');
-                            
-                            if (priceElement) {
-                                // Create a container for the new elements
-                                const container = document.createElement('div');
-                                container.style.cssText = `
-                                    width: 100%;
-                                    display: flex;
-                                    flex-direction: column;
-                                    align-items: center;
-                                `;
-                                // Append the info element to the container
-                                container.appendChild(infoElement);
-                                // If there's a price element, move it into the container
-                                if (priceElement.parentNode) {
-                                    priceElement.parentNode.insertBefore(container, priceElement);
-                                    container.appendChild(priceElement);
-                                }
-                            } else {
-                                console.log('Price element not found');
-                            }
-                        }
-                    }
-                );
-            } else {
-                console.log('Barcode not found in URL');
-            }
-        } else {
-            console.log('Product link href not found');
+    console.log('Product Info:', productInfo);
+    // Create the product information element
+    const infoElement = createProductInfo(
+        productInfo.name,
+        productInfo.nutriScore,
+        productInfo.ecoScore
+    );
+    // Find the price element
+    const priceElement = productElement.querySelector('.stime-product--footer__prices');
+
+    if (priceElement) {
+        // Create a container for the new elements
+        const container = document.createElement('div');
+        container.style.cssText = `
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        `;
+        // Append the info element to the container
+        container.appendChild(infoElement);
+        // If there's a price element, move it into the container
+        if (priceElement.parentNode) {
+            priceElement.parentNode.insertBefore(container, priceElement);
+            container.appendChild(priceElement);
         }
     } else {
-        console.log('Product link element not found');
+        console.log('Price element not found');
     }
+
     productElement.dataset.processed = 'true';
 }
 
@@ -123,7 +93,41 @@ function processProductGrid(): void {
     const productGrid = document.querySelector('.stime-product-list__grid') as HTMLElement | null;
     if (productGrid) {
         const productItems = productGrid.querySelectorAll<HTMLElement>('.stime-product-list__item');
-        productItems.forEach(processProduct);
+        const barcodes: string[] = [];
+
+        productItems.forEach((productElement) => {
+            const productLink = productElement.querySelector('a.link.link--link.productCard__link') as HTMLAnchorElement | null;
+            if (productLink) {
+                const href = productLink.getAttribute('href');
+                if (href) {
+                    const barcode = extractBarcodeFromURL(href);
+                    console.log('Barcode found:', barcode);
+                    if (barcode) {
+                        barcodes.push(barcode);
+                    }
+                }
+            }
+        });
+
+        if (barcodes.length > 0) {
+            // Send message to background script with the extracted barcodes
+            console.log('ready to send message');
+            chrome.runtime.sendMessage(
+                { type: 'getProductsInfo', barcodes: barcodes },
+                (response) => {
+                    if (response && response.products) {
+                        productItems.forEach((productElement, index) => {
+                            const barcode = barcodes[index];
+                            const productInfo = response.products.find((product: any) => product.barcode === barcode);
+                            console.log('processing product:', productInfo);
+                            if (productInfo) {
+                                processProduct(productElement, productInfo);
+                            }
+                        });
+                    }
+                }
+            );
+        }
     } else {
         console.log('Product grid not found');
     }
@@ -154,18 +158,5 @@ observer.observe(document.body, { childList: true, subtree: true });
 window.onload = (): void => {
     processProductGrid();
 };
-
-
-// chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-//     if (message.type === 'filtersUpdated') {
-//         // Re-process all products with new filters
-//         const productGrid = document.querySelector('.stime-product-list__grid');
-//         if (productGrid) {
-//             const productItems = productGrid.querySelectorAll('.stime-product-list__item');
-//             productItems.forEach(processProduct);
-//         }
-//     }
-// });
-
 
 console.log('Content script done');

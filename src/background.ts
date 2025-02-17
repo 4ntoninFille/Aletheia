@@ -1,4 +1,4 @@
-import { getProductInfo } from './api';
+import { getProductInfo, getProductsInfo } from './api';
 let activeFilters: string[] = [];
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -9,10 +9,27 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 name: data.product_name,
                 nutriScore: data.nutriscore_grade || 'Na',
                 ecoScore: data.ecoscore_grade || 'Na',
-                carbonFootprint: 'Na'
             });
         });
-        return true; // Indicates that the response is asynchronous
+        return true;
+    } else if (request.type === 'getProductsInfo') {
+        getProductsInfo(request.barcodes).then((data) => {
+            if (data && data.products_info) {
+                const products = data.products_info.map((product: any) => ({
+                    barcode: product.code,
+                    name: product.product_name,
+                    nutriScore: product.nutriscore_grade || 'Na',
+                    ecoScore: product.ecoscore_grade || 'Na',
+                }));
+                sendResponse({ products });
+            } else {
+                sendResponse({ products: [] });
+            }
+        }).catch((error) => {
+            console.error('Error fetching products info:', error);
+            sendResponse({ products: [] });
+        });
+        return true;
     } else if (request.type === 'setFilters') {
         // activeFilters = request.filters;
         // // Notify content script that filters have changed
