@@ -154,7 +154,10 @@ function processProductGrid(): void {
                 (response) => {
                     if (response && response.products) {
                         productItems.forEach((productElement, index) => {
-                            const barcode = barcodes[index];
+                            const productLink = productElement.querySelector('a.link.link--link.productCard__link') as HTMLAnchorElement | null;
+                            const href = productLink?.getAttribute('href');
+                            const barcode = href ? extractBarcodeFromURL(href) : null;
+                            if (!barcode) return;
                             const productInfo = response.products.find((product: any) => product.barcode === barcode);
                             console.log('processing product:', productInfo);
                             const loader = productElement.querySelector('.loader');

@@ -1,4 +1,4 @@
-const BASE_URL = 'http://35.180.111.230:8010/api/v1/aletheia/products';
+const BASE_URL = 'http://127.0.0.1:8010/api/v1/aletheia/products';
 
 export async function getProductInfo(barcode: string): Promise<any> {
     const url = `${BASE_URL}/${barcode}`;
@@ -8,8 +8,10 @@ export async function getProductInfo(barcode: string): Promise<any> {
 }
 
 export async function getProductsInfo(barcodes: string[]): Promise<any> {
+
     const url = `${BASE_URL}/search`;
     console.log("API call to URL: ", url);
+    console.log("length ", barcodes.length);
     const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -17,5 +19,7 @@ export async function getProductsInfo(barcodes: string[]): Promise<any> {
         },
         body: JSON.stringify({ products: barcodes })
     });
-    return response.json();
+    const data = await response.json();
+    console.log("resp ", data.products_info);
+    return data;
 }
