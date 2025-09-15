@@ -1,13 +1,16 @@
 console.log('Content script loaded');
 
+let aletheiaEnabled = false;
+
 // Function to extract the barcode from the URL
 function extractBarcodeFromURL(url: string): string | null {
     const match = url.match(/\/(\d+)$/);
     return match ? match[1] : null;
 }
 
-function createProductInfo(name: string, nutriScore: string, ecoScore: string): HTMLElement {
+function createProductInfo(barcode: string, name: string, nutriScore: string, ecoScore: string): HTMLElement {
     const infoElement = document.createElement('div');
+    infoElement.className = 'aletheia-info';
     infoElement.style.cssText = `
         background-color: #f0f0f0;
         padding: 10px;
@@ -15,39 +18,57 @@ function createProductInfo(name: string, nutriScore: string, ecoScore: string): 
         border-radius: 5px;
         width: 100%;
         box-sizing: border-box;
+        position: relative;
     `;
 
-    // Function to get Nutri-Score color
-    const getScoreColor = (score: string): string => {
-        const colors: { [key: string]: string } = {
-            'A': '#038141',
-            'B': '#85BB2F',
-            'C': '#FECB02',
-            'D': '#EE8100',
-            'E': '#E63E11'
-        };
-        return colors[score.toUpperCase()] || '#000000';
+    // Function to get Nutri-Score image path
+    const getNutriScoreImage = (score: string): string => {
+        const normalizedScore = score.toUpperCase();
+        if (normalizedScore === 'UNKNOWN') {
+            return chrome.runtime.getURL('assets/nutriscore/nutriscore-unknown.svg');
+        }
+        if (normalizedScore === 'NOT-APPLICABLE') {
+            return chrome.runtime.getURL('assets/nutriscore/nutriscore-not-applicable.svg');
+        }
+        const extensionUrl = chrome.runtime.getURL(`assets/nutriscore/nutriscore-${normalizedScore.toLowerCase()}.svg`);
+        return extensionUrl;
     };
 
-    // Function to get score display
-    const getScoreDisplay = (score: string): string => {
-        if (score.toUpperCase() === 'UNKNOWN') {
-            return '<span style="color: red; font-weight: bold;">Na</span>';
+    // Function to get Eco-Score image path
+    const getEcoScoreImage = (score: string): string => {
+        const normalizedScore = score.toUpperCase();
+        if (normalizedScore === 'UNKNOWN') {
+            return chrome.runtime.getURL('assets/ecoscore/green-score-unknown.svg');
         }
-        return `<span style="background-color: ${getScoreColor(score)}; color: white; padding: 2px 5px; border-radius: 3px;">
-          ${score.toUpperCase()}
-        </span>`;
+        let extensionUrl;
+        // Handle special case for A+ if it exists
+        if (normalizedScore === 'A+') {
+            extensionUrl = chrome.runtime.getURL('assets/ecoscore/green-score-a-plus.svg');
+        } else {
+            extensionUrl = chrome.runtime.getURL(`assets/ecoscore/green-score-${normalizedScore.toLowerCase()}.svg`);
+        }
+        return extensionUrl;
     };
+
+    // Function to get score display with image
+    const getScoreDisplay = (score: string, isEcoScore: boolean = false): string => {
+        const imagePath = isEcoScore ? getEcoScoreImage(score) : getNutriScoreImage(score);
+        return `<img src="${imagePath}" alt="${score.toUpperCase()} Score" style="height: 50px; vertical-align: middle;" />`;
+    };
+
+    // Create OpenFoodFacts URL
+    const openFoodFactsUrl = `https://fr.openfoodfacts.org/produit/${barcode}`;
 
     infoElement.innerHTML = `
-      <p>
-        <strong>Nutri-Score:</strong> 
-        ${getScoreDisplay(nutriScore)}
-      </p>
-      <p>
-        <strong>Eco-Score:</strong> 
-        ${getScoreDisplay(ecoScore)}
-      </p>
+      <div>
+        <a href="${openFoodFactsUrl}" target="_blank" rel="noopener noreferrer" style="position: absolute; top: 8px; right: 8px; color: #007bff; text-decoration: none; font-size: 18px; font-weight: bold; z-index: 1;">
+          ?
+        </a>
+        <div style="display: flex; gap: 20px; align-items: center;">
+            ${getScoreDisplay(nutriScore, false)}
+            ${getScoreDisplay(ecoScore, true)}
+        </div>
+      </div>
     `;
     return infoElement;
 }
@@ -84,6 +105,7 @@ function processProduct(productElement: HTMLElement, productInfo: any) {
     console.log('Product Info:', productInfo);
     // Create the product information element
     const infoElement = createProductInfo(
+        productInfo.barcode,
         productInfo.name,
         productInfo.nutriScore,
         productInfo.ecoScore
@@ -191,7 +213,12 @@ function debounce<T extends (...args: any[]) => void>(func: T, delay: number): T
 const observer = new MutationObserver(
     debounce(() => {
         observer.disconnect(); // Temporarily disconnect to avoid loops
-        processProductGrid();
+        if (aletheiaEnabled) {
+            console.log('Aletheia is enabled');
+            processProductGrid();
+        } else {
+            console.log('Aletheia is disabled');
+        }
         observer.observe(document.body, { childList: true, subtree: true }); // Reconnect observer
     }, 200) // Debounce delay (adjust as needed)
 );
@@ -199,9 +226,30 @@ const observer = new MutationObserver(
 // Observe the body for changes
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Initial check when the page loads
-window.onload = (): void => {
-    processProductGrid();
-};
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.type === 'aletheia-toggle') {
+        aletheiaEnabled = aletheiaEnabled ? false : true;
+        const show = message.enabled;
+        document.querySelectorAll('.aletheia-info').forEach(el => {
+            (el as HTMLElement).style.display = show ? '' : 'none';
+        });
+        if (show) {
+            processProductGrid();
+        }
+    }
+});
+
+chrome.storage.local.get(['aletheiaEnabled'], (result) => {
+    aletheiaEnabled = result.aletheiaEnabled !== undefined ? result.aletheiaEnabled : true;
+    document.querySelectorAll('.aletheia-info').forEach(el => {
+        (el as HTMLElement).style.display = aletheiaEnabled ? '' : 'none';
+    });
+    if (aletheiaEnabled) {
+        console.log('Aletheia is enabled');
+        processProductGrid();
+    } else {
+        console.log('Aletheia is disabled: ', result.aletheiaEnabled);
+    }
+});
 
 console.log('Content script done');

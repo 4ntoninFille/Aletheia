@@ -1,20 +1,33 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-    <title>Product Filter</title>
+    <meta charset="UTF-8">
+    <title>Aletheia - Extension</title>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <h2>Filter Products</h2>
-    <label>
-        <input type="checkbox" id="filterA" value="A"> Nutri-score A
-    </label><br>
-    <label>
-        <input type="checkbox" id="filterB" value="B"> Nutri-score B
-    </label><br>
-    <label>
-        <input type="checkbox" id="filterC" value="C"> Nutri-score C
-    </label><br>
-    <button id="applyFilters">Apply Filters</button>
+    <div class="header">
+        <span class="title">Aletheia</span>
+        <button id="infoBtn" class="icon-btn" title="Le saviez-vous ?">?</button>
+    </div>
+    <div class="switch-row">
+        <label class="switch">
+            <input type="checkbox" id="themeSwitch">
+            <span class="slider"></span>
+        </label>
+        <span class="switch-label">Mode nuit</span>
+    </div>
+    <div id="infoBox" class="info-box" hidden>
+        <h2>Le saviez-vous ?</h2>
+        <p>
+            Le <strong>Nutri-score</strong> est un score nutritionnel calculé à partir de la composition des produits alimentaires pour vous aider à mieux choisir.<br>
+            Il existe aussi l'<strong>Eco-score</strong>, qui évalue l'impact environnemental des produits.<br><br>
+            Cette extension utilise la base de données <a href="https://fr.openfoodfacts.org/" target="_blank">Open Food Facts</a> pour vous fournir des informations fiables et transparentes sur les produits.
+        </p>
+    </div>
+    <div class="toggle-row">
+        <button id="toggleExtension" class="toggle-btn">Désactiver Aletheia</button>
+    </div>
     <script src="popup.js"></script>
 </body>
 </html>

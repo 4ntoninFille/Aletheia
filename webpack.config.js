@@ -34,6 +34,8 @@ module.exports = (env) => {
                 patterns: [
                     { from: `public/${manifestFile}`, to: 'manifest.json' },
                     { from: `public/popup.html`, to: '.' },
+                    { from: `public/popup.css`, to: '.' },
+                    { from: 'public/assets', to: 'assets' },
                   ],
           
             }),
