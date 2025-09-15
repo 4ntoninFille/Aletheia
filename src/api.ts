@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:8010/api/v1/aletheia/products';
+const BASE_URL = 'https://aletheia-server-1038641305939.europe-west9.run.app/api/v1/aletheia/products';
 
 export async function getProductInfo(barcode: string): Promise<any> {
     const url = `${BASE_URL}/${barcode}`;
