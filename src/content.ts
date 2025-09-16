@@ -138,9 +138,7 @@ function processProduct(productElement: HTMLElement, productInfo: any) {
 
 // Function to process all product items in the grid
 function processProductGrid(): void {
-    const productGrid = document.querySelector('.stime-product-list__grid') as HTMLElement | null;
-    if (productGrid) {
-        const productItems = productGrid.querySelectorAll<HTMLElement>('.stime-product-list__item');
+        const productItems = document.querySelectorAll<HTMLElement>('[data-testid="product-layout"]');
         const barcodes: string[] = [];
 
         productItems.forEach((productElement) => {
@@ -195,9 +193,6 @@ function processProductGrid(): void {
                 }
             );
         }
-    } else {
-        console.log('Product grid not found');
-    }
 }
 
 // Utility function for debouncing
