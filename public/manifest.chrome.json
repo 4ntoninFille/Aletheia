@@ -1,37 +1,31 @@
 {
-    "manifest_version": 3,
-    "version": "0.1",
-    "name": "Aletheia",
-    "permissions": [
-        "storage"
-    ],
-    "host_permissions": [
-        "https://world.openfoodfacts.net/*",
-        "http://127.0.0.1/*",
-        "https://aletheia-server-1038641305939.europe-west9.run.app/*",
-        "http://35.180.111.230:8010/*",
-        "https://www.intermarche.com/*"
-    ],
-    "background": {
-        "service_worker": "background.js"
-    },
-    "content_scripts": [
-        {
-            "matches": [
-                "https://www.intermarche.com/*"
-            ],
-            "js": [
-                "content.js"
-            ]
-        }
-    ],
-    "action": {
-        "default_popup": "popup.html"
-    },
-    "web_accessible_resources": [
-        {
-            "resources": ["assets/*"],
-            "matches": ["https://www.intermarche.com/*"]
-        }
-    ]
+  "manifest_version": 3,
+  "version": "0.1",
+  "name": "Aletheia",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://world.openfoodfacts.net/*",
+    "http://127.0.0.1/*",
+    "https://aletheia-server-1038641305939.europe-west9.run.app/*",
+    "http://35.180.111.230:8010/*",
+    "https://www.intermarche.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.intermarche.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["https://www.intermarche.com/*"]
+    }
+  ]
 }
