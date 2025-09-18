@@ -33,8 +33,13 @@ This command will create a `dist` folder containing the built extension.
 
 5. For development with auto-rebuilding on file changes, use:
 ```shell
-npm run watch
+npm run watch:chrome
 ```
+for Chrome, or:
+```shell
+npm run watch:firefox
+```
+for Firefox.
 
 ## Loading Aletheia in Your Browser
 
