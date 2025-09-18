@@ -28,8 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Activation toggle button
   if (toggleBtn) {
-    chrome.storage.local.get(['aletheiaEnabled'], result => {
-      const enabled = result.aletheiaEnabled !== undefined ? result.aletheiaEnabled : true;
+    chrome.storage.local.get(['panierclairEnabled'], result => {
+      const enabled = result.panierclairEnabled !== undefined ? result.panierclairEnabled : true;
       toggleBtn.textContent = enabled ? 'Désactiver' : 'Activer';
       toggleBtn.dataset.enabled = enabled ? 'true' : 'false';
     });
@@ -37,12 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleBtn.addEventListener('click', () => {
       const currentlyEnabled = toggleBtn.dataset.enabled === 'true';
       const newEnabled = !currentlyEnabled;
-      chrome.storage.local.set({ aletheiaEnabled: newEnabled });
+      chrome.storage.local.set({ panierclairEnabled: newEnabled });
       toggleBtn.textContent = newEnabled ? 'Désactiver' : 'Activer';
       toggleBtn.dataset.enabled = newEnabled ? 'true' : 'false';
       chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
         if (tabs[0]?.id) {
-          chrome.tabs.sendMessage(tabs[0].id, { type: 'aletheia-toggle', enabled: newEnabled });
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'panierclair-toggle', enabled: newEnabled });
         }
       });
     });

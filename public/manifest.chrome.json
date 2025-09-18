@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "version": "0.1",
-  "name": "Aletheia",
+  "name": "PanierClair",
   "permissions": ["storage"],
   "host_permissions": [
     "https://world.openfoodfacts.net/*",

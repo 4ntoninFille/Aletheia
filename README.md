@@ -1,22 +1,22 @@
-# Aletheia
+# PanierClair
 This is a web extension made to reveal online food drive Nutriscore and carbon impact.
 
 ## API Usage
-Aletheia uses the OpenFoodFacts API for calculating the Nutriscore and carbon impact of food products. The API provides access to a large, open database of food product information that helps generate accurate nutrition and environmental data.
+PanierClair uses the OpenFoodFacts API for calculating the Nutriscore and carbon impact of food products. The API provides access to a large, open database of food product information that helps generate accurate nutrition and environmental data.
 OpenFoodFacts
 
 ## How to Build
 
-Follow these steps to build Aletheia:
+Follow these steps to build PanierClair:
 
 1. Ensure you have [Node.js](https://nodejs.org/) (version 12 or higher) installed on your system.
 
-2. Clone the Aletheia repository:
+2. Clone the PanierClair repository:
 ```shell
-git clone git@github.com:4ntoninFille/Aletheia.git
+git clone git@github.com:4ntoninFille/PanierClair.git
 ```
 ```shell
-cd Aletheia
+cd PanierClair
 ```
 
 3. Install the project dependencies:
@@ -41,19 +41,19 @@ npm run watch:firefox
 ```
 for Firefox.
 
-## Loading Aletheia in Your Browser
+## Loading PanierClair in Your Browser
 
 ### Chrome
 
 1. Open Chrome and navigate to `chrome://extensions`.
 2. Enable "Developer mode" in the top right corner.
-3. Click "Load unpacked" and select the `dist` folder from the Aletheia project.
+3. Click "Load unpacked" and select the `dist` folder from the PanierClair project.
 
 ### Firefox
 
 1. Open Firefox and navigate to `about:debugging`.
 2. Click "This Firefox" in the left sidebar.
-3. Click "Load Temporary Add-on" and select any file in the `dist` folder of Aletheia.
+3. Click "Load Temporary Add-on" and select any file in the `dist` folder of PanierClair.
 
 ## Development
 

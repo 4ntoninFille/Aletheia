@@ -1,6 +1,6 @@
 console.log('Content script loaded');
 
-let aletheiaEnabled = false;
+let panierclairEnabled = false;
 
 // Function to extract the barcode from the URL
 function extractBarcodeFromURL(url: string): string | null {
@@ -10,7 +10,7 @@ function extractBarcodeFromURL(url: string): string | null {
 
 function createProductInfo(barcode: string, name: string, nutriScore: string, ecoScore: string): HTMLElement {
   const infoElement = document.createElement('div');
-  infoElement.className = 'aletheia-info';
+  infoElement.className = 'panierclair-info';
   infoElement.style.cssText = `
         background-color: #f0f0f0;
         padding: 10px;
@@ -220,11 +220,11 @@ function debounce<T extends (...args: unknown[]) => void>(func: T, delay: number
 const observer = new MutationObserver(
   debounce(() => {
     observer.disconnect(); // Temporarily disconnect to avoid loops
-    if (aletheiaEnabled) {
-      console.log('Aletheia is enabled');
+    if (panierclairEnabled) {
+      console.log('PanierClair is enabled');
       processProductGrid();
     } else {
-      console.log('Aletheia is disabled');
+      console.log('PanierClair is disabled');
     }
     observer.observe(document.body, { childList: true, subtree: true }); // Reconnect observer
   }, 200), // Debounce delay (adjust as needed)
@@ -234,10 +234,10 @@ const observer = new MutationObserver(
 observer.observe(document.body, { childList: true, subtree: true });
 
 chrome.runtime.onMessage.addListener(message => {
-  if (message.type === 'aletheia-toggle') {
-    aletheiaEnabled = aletheiaEnabled ? false : true;
+  if (message.type === 'panierclair-toggle') {
+    panierclairEnabled = panierclairEnabled ? false : true;
     const show = message.enabled;
-    document.querySelectorAll('.aletheia-info').forEach(el => {
+    document.querySelectorAll('.panierclair-info').forEach(el => {
       (el as HTMLElement).style.display = show ? '' : 'none';
     });
     if (show) {
@@ -246,16 +246,16 @@ chrome.runtime.onMessage.addListener(message => {
   }
 });
 
-chrome.storage.local.get(['aletheiaEnabled'], result => {
-  aletheiaEnabled = result.aletheiaEnabled !== undefined ? result.aletheiaEnabled : true;
-  document.querySelectorAll('.aletheia-info').forEach(el => {
-    (el as HTMLElement).style.display = aletheiaEnabled ? '' : 'none';
+chrome.storage.local.get(['panierclairEnabled'], result => {
+  panierclairEnabled = result.panierclairEnabled !== undefined ? result.panierclairEnabled : true;
+  document.querySelectorAll('.panierclair-info').forEach(el => {
+    (el as HTMLElement).style.display = panierclairEnabled ? '' : 'none';
   });
-  if (aletheiaEnabled) {
-    console.log('Aletheia is enabled');
+  if (panierclairEnabled) {
+    console.log('PanierClair is enabled');
     processProductGrid();
   } else {
-    console.log('Aletheia is disabled: ', result.aletheiaEnabled);
+    console.log('PanierClair is disabled: ', result.panierclairEnabled);
   }
 });
 
