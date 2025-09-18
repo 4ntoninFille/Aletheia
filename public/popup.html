@@ -1,33 +1,36 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fr">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Aletheia - Extension</title>
-    <link rel="stylesheet" href="popup.css">
-</head>
-<body>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
     <div class="header">
-        <span class="title">Aletheia</span>
-        <button id="infoBtn" class="icon-btn" title="Le saviez-vous ?">?</button>
+      <span class="title">Aletheia</span>
+      <button id="infoBtn" class="icon-btn" title="Le saviez-vous ?">?</button>
     </div>
     <div class="switch-row">
-        <label class="switch">
-            <input type="checkbox" id="themeSwitch">
-            <span class="slider"></span>
-        </label>
-        <span class="switch-label">Mode nuit</span>
+      <label class="switch">
+        <input type="checkbox" id="themeSwitch" />
+        <span class="slider"></span>
+      </label>
+      <span class="switch-label">Mode nuit</span>
     </div>
     <div id="infoBox" class="info-box" hidden>
-        <h2>Le saviez-vous ?</h2>
-        <p>
-            Le <strong>Nutri-score</strong> est un score nutritionnel calculé à partir de la composition des produits alimentaires pour vous aider à mieux choisir.<br>
-            Il existe aussi l'<strong>Eco-score</strong>, qui évalue l'impact environnemental des produits.<br><br>
-            Cette extension utilise la base de données <a href="https://fr.openfoodfacts.org/" target="_blank">Open Food Facts</a> pour vous fournir des informations fiables et transparentes sur les produits.
-        </p>
+      <h2>Le saviez-vous ?</h2>
+      <p>
+        Le <strong>Nutri-score</strong> est un score nutritionnel calculé à partir de la composition des produits
+        alimentaires pour vous aider à mieux choisir.<br />
+        Il existe aussi l'<strong>Eco-score</strong>, qui évalue l'impact environnemental des produits.<br /><br />
+        Cette extension utilise la base de données
+        <a href="https://fr.openfoodfacts.org/" target="_blank">Open Food Facts</a> pour vous fournir des informations
+        fiables et transparentes sur les produits.
+      </p>
     </div>
     <div class="toggle-row">
-        <button id="toggleExtension" class="toggle-btn">Désactiver Aletheia</button>
+      <button id="toggleExtension" class="toggle-btn">Désactiver Aletheia</button>
     </div>
     <script src="popup.js"></script>
-</body>
+  </body>
 </html>

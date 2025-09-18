@@ -1,0 +1,96 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Check Prettier formatting
+        run: npx prettier --check .
+
+      - name: Build Chrome extension
+        run: npm run build:chrome
+
+      - name: Build Firefox extension
+        run: npm run build:firefox
+      - name: Create Chrome extension zip
+        run: |
+          cd dist/chrome
+          zip -r ../chrome-extension-pr-${{ github.event.number }}.zip .
+
+      - name: Create Firefox extension zip
+        run: |
+          cd dist/firefox
+          zip -r ../firefox-extension-pr-${{ github.event.number }}.zip .
+      - name: Upload Chrome extension artifact
+        id: upload-chrome
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension-pr-${{ github.event.number }}
+          path: dist/chrome-extension-pr-${{ github.event.number }}.zip
+          retention-days: 7
+
+      - name: Upload Firefox extension artifact
+        id: upload-firefox
+        uses: actions/upload-artifact@v4
+        with:
+          name: firefox-extension-pr-${{ github.event.number }}
+          path: dist/firefox-extension-pr-${{ github.event.number }}.zip
+          retention-days: 7
+
+      - name: Comment on PR with download links
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });     
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('## 📦 Extension Builds')
+            );      
+             const commentBody = `## 📦 Extension Builds    
+             Extensions have been built successfully!       
+             **Available extensions:**
+             - [📥 chrome-extension-pr-${context.issue.number}](${{ steps.upload-chrome.outputs.artifact-url }}) - Chrome Extension
+             - [📥 firefox-extension-pr-${context.issue.number}](${{ steps.upload-firefox.outputs.artifact-url }}) - Firefox Extension      
+             > 💡 **Note:** Artifacts are available for 7 days.`;      
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }

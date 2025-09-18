@@ -1,7 +1,7 @@
 # Aletheia
 This is a web extension made to reveal online food drive Nutriscore and carbon impact.
 
-# API Usage
+## API Usage
 Aletheia uses the OpenFoodFacts API for calculating the Nutriscore and carbon impact of food products. The API provides access to a large, open database of food product information that helps generate accurate nutrition and environmental data.
 OpenFoodFacts
 
