@@ -34,24 +34,24 @@ function createProductInfo(barcode: string, name: string, nutriScore: string, ec
     return extensionUrl;
   };
 
-    // Function to get Eco-Score image path
-    const getEcoScoreImage = (score: string): string => {
-        const normalizedScore = score.toUpperCase();
-        if (normalizedScore === 'UNKNOWN') {
-            return chrome.runtime.getURL('assets/ecoscore/green-score-unknown.svg');
-        }
-        if (normalizedScore === 'NOT-APPLICABLE') {
-            return chrome.runtime.getURL('assets/ecoscore/green-score-not-applicable.svg');
-        }
-        let extensionUrl;
-        // Handle special case for A+ if it exists
-        if (normalizedScore === 'A+') {
-            extensionUrl = chrome.runtime.getURL('assets/ecoscore/green-score-a-plus.svg');
-        } else {
-            extensionUrl = chrome.runtime.getURL(`assets/ecoscore/green-score-${normalizedScore.toLowerCase()}.svg`);
-        }
-        return extensionUrl;
-    };
+  // Function to get Eco-Score image path
+  const getEcoScoreImage = (score: string): string => {
+    const normalizedScore = score.toUpperCase();
+    if (normalizedScore === 'UNKNOWN') {
+      return chrome.runtime.getURL('assets/ecoscore/green-score-unknown.svg');
+    }
+    if (normalizedScore === 'NOT-APPLICABLE') {
+      return chrome.runtime.getURL('assets/ecoscore/green-score-not-applicable.svg');
+    }
+    let extensionUrl;
+    // Handle special case for A+ if it exists
+    if (normalizedScore === 'A+') {
+      extensionUrl = chrome.runtime.getURL('assets/ecoscore/green-score-a-plus.svg');
+    } else {
+      extensionUrl = chrome.runtime.getURL(`assets/ecoscore/green-score-${normalizedScore.toLowerCase()}.svg`);
+    }
+    return extensionUrl;
+  };
 
   // Function to get score display with image
   const getScoreDisplay = (score: string, isEcoScore: boolean = false): string => {
@@ -146,8 +146,8 @@ function processProduct(
 function processProductGrid(): void {
   const productGrid = document.querySelector('.stime-product-list__grid') as HTMLElement | null;
   if (productGrid) {
-      const productItems = document.querySelectorAll<HTMLElement>('[data-testid="product-layout"]');
-      const barcodes: string[] = [];
+    const productItems = document.querySelectorAll<HTMLElement>('[data-testid="product-layout"]');
+    const barcodes: string[] = [];
 
     productItems.forEach(productElement => {
       if (!productElement.dataset.loaderAdded) {
