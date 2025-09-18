@@ -40,6 +40,9 @@ function createProductInfo(barcode: string, name: string, nutriScore: string, ec
         if (normalizedScore === 'UNKNOWN') {
             return chrome.runtime.getURL('assets/ecoscore/green-score-unknown.svg');
         }
+        if (normalizedScore === 'NOT-APPLICABLE') {
+            return chrome.runtime.getURL('assets/ecoscore/green-score-not-applicable.svg');
+        }
         let extensionUrl;
         // Handle special case for A+ if it exists
         if (normalizedScore === 'A+') {
